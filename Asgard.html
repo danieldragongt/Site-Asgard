@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CT Asgard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)),
+url("fundo.png");
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+color:white;
+}
+
+/* HEADER */
+
+header{
+position:fixed;
+top:0;
+width:100%;
+background:black;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 40px;
+border-bottom:1px solid #00aaff;
+z-index:10;
+}
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.logo-area img{
+height:45px;
+}
+
+.logo-area h1{
+color:#00aaff;
+text-shadow:0 0 10px #0088ff;
+font-size:22px;
+}
+
+/* MENU */
+
+nav{
+display:flex;
+gap:30px;
+}
+
+nav a{
+color:#00aaff;
+text-decoration:none;
+font-weight:bold;
+transition:0.3s;
+}
+
+nav a:hover{
+color:#66d9ff;
+}
+
+/* HERO */
+
+.hero{
+height:100vh;
+background:
+linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+url("fundo.png");
+background-size:cover;
+background-position:center;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:flex-end;
+text-align:right;
+padding: 0 10%;
+position:relative;
+overflow:hidden;
+}
+
+/* CONTEÚDO FICA NA FRENTE */
+
+.hero h2,
+.hero p{
+position:relative;
+z-index:2;
+}
+
+.raio-texto{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+overflow:hidden;
+z-index:1;
+}
+
+.raio{
+position:absolute;
+width:3px;
+height:200%;
+background:linear-gradient(#ffffff,#00aaff,#ffffff);
+opacity:0;
+animation:raioMove 4s infinite;
+}
+
+.raio:nth-child(1){
+left:30%;
+animation-delay:1s;
+}
+
+.raio:nth-child(2){
+left:60%;
+animation-delay:2s;
+}
+
+.raio:nth-child(3){
+left:80%;
+animation-delay:3s;
+}
+
+@keyframes raioMove{
+0%{
+opacity:0;
+transform:translateY(-100%);
+}
+10%{
+opacity:1;
+}
+20%{
+opacity:0;
+transform:translateY(100%);
+}
+100%{
+opacity:0;
+}
+}
+
+.hero h2{
+font-family:'Cinzel', serif;
+font-size:70px;
+letter-spacing:4px;
+color:#66ccff;
+text-shadow:
+0 0 10px #00aaff,
+0 0 20px #0088ff,
+0 0 40px #0066ff;
+margin-bottom:10px;
+}
+
+.hero p{
+margin-top:10px;
+font-size:30px;
+color:#cceeff;
+}
+
+/* SECTIONS */
+
+section{
+padding:100px 10%;
+background:#0b0b0b;
+}
+
+section h2{
+font-size:36px;
+margin-bottom:25px;
+color:#00aaff;
+text-shadow:0 0 10px #0077ff;
+}
+
+section p{
+color:#cceeff;
+line-height: 1.6;
+}
+
+/* CARDS MODALIDADES */
+
+.cards{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.card{
+background:#111;
+border-radius:10px;
+overflow:hidden;
+flex:1;
+min-width:250px;
+border:1px solid #00aaff;
+transition:0.3s;
+}
+
+.card img{
+width:100%;
+height:180px;
+object-fit:cover;
+}
+
+.card-content{
+padding:20px;
+}
+
+.card h3{
+color:#00aaff;
+margin-bottom:10px;
+}
+
+.card p{
+color:#cceeff;
+}
+
+.card:hover{
+transform:scale(1.05);
+box-shadow:0 0 15px #0088ff;
+}
+
+/* GALERIA */
+
+.galeria{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:10px;
+}
+
+.galeria img{
+width:100%;
+height:220px;
+object-fit:cover;
+transition:0.3s;
+cursor:pointer;
+}
+
+.galeria img:hover{
+transform:scale(1.05);
+filter:brightness(1.2);
+}
+
+/* TABELA */
+
+.table-container {
+width: 100%;
+overflow-x: auto; /* Permite rolagem no celular se a tabela for muito larga */
+}
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+background:#111;
+min-width: 400px; /* Garante que não fique esmagada em telas minúsculas */
+}
+
+th{
+background:#001a33;
+color:#00aaff;
+}
+
+td, th{
+border:1px solid #003366;
+padding:12px;
+text-align:center;
+color:#cceeff;
+}
+
+/* CONTATO */
+
+#contato p{
+margin:6px 0;
+}
+
+/* WHATSAPP */
+
+.whatsapp{
+position:fixed;
+bottom:25px;
+right:25px;
+width:60px;
+height:60px;
+background:#25D366;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+text-decoration:none;
+box-shadow:0 0 15px rgba(0,0,0,0.5);
+z-index:100;
+transition:0.3s;
+}
+
+.whatsapp:hover{
+transform:scale(1.1);
+}
+
+/* FOOTER */
+
+footer{
+background:black;
+text-align:center;
+padding:20px;
+color:#00aaff;
+border-top:1px solid #003366;
+}
+
+/* ========================================= */
+/* RESPONSIVIDADE (MOBILE & TABLET)          */
+/* ========================================= */
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        font-size: 14px;
+    }
+
+    .hero {
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero h2 {
+        font-size: 40px; /* Reduz título no celular */
+        letter-spacing: 2px;
+    }
+
+    .hero p {
+        font-size: 20px; /* Reduz subtítulo no celular */
+    }
+
+    section {
+        padding: 60px 5%; /* Menos respiro lateral para aproveitar a tela */
+    }
+
+    .galeria {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .galeria img {
+        height: 150px; /* Adapta as imagens para não ficarem tão esticadas */
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo-area">
+<img src="logoasgard.png" alt="Logo CT Asgard">
+<h1>CT ASGARD</h1>
+</div>
+
+<nav>
+<a href="#inicio">Início</a>
+<a href="#sobre">Sobre</a>
+<a href="#modalidades">Modalidades</a>
+<a href="#galeria">Galeria</a>
+<a href="#horarios">Horários</a>
+<a href="#contato">Contato</a>
+</nav>
+
+</header>
+
+<div class="hero" id="inicio">
+
+<div class="raio-texto">
+<div class="raio"></div>
+<div class="raio"></div>
+<div class="raio"></div>
+</div>
+
+<h2>CT ASGARD</h2>
+<p>Força • Disciplina • Evolução</p>
+
+</div>
+
+<section id="sobre">
+
+<h2>Sobre o CT</h2>
+
+<p>
+O CT Asgard é um centro de treinamento dedicado ao desenvolvimento físico,
+mental e técnico através das artes marciais. Nosso objetivo é formar atletas
+fortes, disciplinados e preparados para desafios dentro e fora do tatame.
+</p>
+
+</section>
+
+<section id="modalidades">
+
+<h2>Modalidades</h2>
+
+<div class="cards">
+
+<div class="card">
+<img src="muaythai.png.png" alt="Muay Thai">
+<div class="card-content">
+<h3>Muay Thai</h3>
+<p>Treinamento completo com foco em técnica, resistência e evolução.</p>
+</div>
+</div>
+
+<div class="card">
+<img src="muaythaikids.png.png" alt="Muay Thai Kids">
+<div class="card-content">
+<h3>Muay Thai Kids</h3>
+<p>Aulas para crianças com foco em disciplina e coordenação.</p>
+</div>
+</div>
+
+<div class="card">
+<img src="jiujitsu.png.png" alt="Jiu-Jitsu">
+<div class="card-content">
+<h3>Jiu-Jitsu</h3>
+<p>Arte suave baseada em técnica, controle e finalizações.</p>
+</div>
+</div>
+
+</div>
+
+</section>
+
+<section id="galeria">
+
+<h2>Galeria</h2>
+
+<div class="galeria">
+
+<img src="foto1.jpg" alt="Foto treino">
+<img src="foto2.jpg" alt="Foto treino">
+<img src="foto3.jpg" alt="Foto treino">
+<img src="foto4.jpg" alt="Foto treino">
+<img src="foto5.jpg" alt="Foto treino">
+<img src="foto6.jpg" alt="Foto treino">
+<img src="foto7.jpg" alt="Foto treino">
+<img src="foto8.jpg" alt="Foto treino">
+
+</div>
+
+</section>
+
+<section id="horarios">
+
+<h2>Horários</h2>
+
+<div class="table-container">
+<table>
+
+<tr>
+<th>Modalidade</th>
+<th>Dias</th>
+<th>Horário</th>
+</tr>
+
+<tr>
+<td>Muay Thai</td>
+<td>Seg / Qua / Sex</td>
+<td>18h às 19h</td>
+</tr>
+
+<tr>
+<td>Muay Thai</td>
+<td>Seg / Qua / Sex</td>
+<td>19h às 20h</td>
+</tr>
+
+<tr>
+<td>Muay Thai</td>
+<td>Seg / Qua / Sex</td>
+<td>20h às 21h</td>
+</tr>
+
+<tr>
+<td>Muay Thai Kids</td>
+<td>Ter / Qui</td>
+<td>18h às 19h</td>
+</tr>
+
+<tr>
+<td>Jiu-Jitsu</td>
+<td>Seg / Qua</td>
+<td>21h às 22h</td>
+</tr>
+
+</table>
+</div>
+
+</section>
+
+<section id="contato">
+
+<h2>Contato</h2>
+
+<p>📍 Endereço: Rua Santa Luzia, 132</p>
+<p>📱 WhatsApp: (31) 98523-2297</p>
+<p>📷 Instagram: @ctasgard</p>
+
+</section>
+
+<footer>
+
+<p>© 2026 CT Asgard</p>
+
+</footer>
+
+<a href="https://wa.me/5531985232297" class="whatsapp">
+💬
+</a>
+
+</body>
+</html>
