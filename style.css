@@ -490,3 +490,38 @@ body.admin-mode .btn-delete-pic {
     height:150px;
   }
 }
+
+/* CONTAINER E BOTÃO DA GALERIA (HOME) */
+
+.btn-galeria-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Centraliza o botão na tela */
+  margin-top: 30px;        /* Dá um espaço elegante entre as fotos e o botão */
+}
+
+.btn-asgard {
+  display: inline-block;
+  padding: 14px 35px;
+  background: #111;
+  color: #00aaff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;  /* Remove o sublinhado do link */
+  text-transform: uppercase; /* Deixa o texto em MAIÚSCULO */
+  letter-spacing: 1px;
+  border: 1px solid #00aaff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 0 5px rgba(0, 136, 255, 0.2);
+}
+
+/* EFEITO AO PASSAR O MOUSE (HOVER) */
+.btn-asgard:hover {
+  background: #00aaff;
+  color: #000;            /* O texto vira preto para contrastar com o fundo azul */
+  box-shadow: 0 0 20px #0088ff; /* Efeito de brilho neon */
+  transform: scale(1.05); /* Leve aumento de tamanho */
+}
