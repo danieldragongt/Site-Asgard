@@ -331,56 +331,35 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-  // COLE SUAS CREDENCIAIS DO SUPABASE AQUI DENTRO:
-  const SUPABASE_URL = "https://roqpruqjmehdatlyfmiw.supabase.co/rest/v1/";
-  const SUPABASE_KEY = "sb_publishable_HFTjOhnkQDa5Vu6awnskYA_XyCbSius";
-  
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
   const STORAGE_KEY = 'asgard_fotos'; 
   let images = [];
   let lightboxIndex = 0;
   
   const IS_ADMIN = sessionStorage.getItem("asgard_admin_logado") === "true";
 
-  // Suas fotos locais originais (caso a nuvem esteja vazia)
-  const fotosLocaisPadrao = [
-    { name: "Treino 1", data: "fotos/foto1.jpeg" },
-    { name: "Treino 2", data: "fotos/foto2.jpeg" },
-    { name: "Treino 3", data: "fotos/foto3.jpeg" },
-    { name: "Treino 4", data: "fotos/foto4.jpeg" },
-    { name: "Treino 5", data: "fotos/foto5.jpeg" },
-    { name: "Treino 6", data: "fotos/foto6.jpeg" },
-    { name: "Treino 7", data: "fotos/foto7.jpeg" },
-    { name: "Treino 8", data: "fotos/foto8.jpeg" },
-    { name: "Treino 9", data: "fotos/foto9.jpeg" },
-    { name: "Treino 10", data: "fotos/foto10.jpeg" }
-  ];
-
-  // ── Carregar Banco de Dados em Nuvem (Supabase) com fallback local ──
-  async function loadImages() {
+  function loadImages() {
     try {
-      // Puxa os dados da tabela "fotos" do Supabase
-      const { data, error } = await supabase
-        .from('Fotos')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        // Se houver fotos na nuvem, use-as mapeando os campos corretos
-        images = data.map(img => ({ id: img.id, name: img.nome, data: img.url }));
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        images = parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
       } else {
-        // Se a nuvem estiver vazia, carrega suas fotos da pasta local
-        images = fotosLocaisPadrao;
+        images = [
+          { name: "Treino 1", data: "fotos/foto1.jpeg" },
+          { name: "Treino 2", data: "fotos/foto2.jpeg" },
+          { name: "Treino 3", data: "fotos/foto3.jpeg" },
+          { name: "Treino 4", data: "fotos/foto4.jpeg" },
+          { name: "Treino 5", data: "fotos/foto5.jpeg" },
+          { name: "Treino 6", data: "fotos/foto6.jpeg" },
+          { name: "Treino 7", data: "fotos/foto7.jpeg" },
+          { name: "Treino 8", data: "fotos/foto8.jpeg" },
+          { name: "Treino 9", data: "fotos/foto9.jpeg" },
+          { name: "Treino 10", data: "fotos/foto10.jpeg" },
+        ];
       }
     } catch (e) {
-      console.error("Erro ao conectar com Supabase, carregando fotos locais:", e);
-      images = fotosLocaisPadrao;
+      images = [];
     }
     
     ajustarVisaoAdmin();
@@ -394,6 +373,14 @@
     if (!IS_ADMIN) {
       if (toolbar) toolbar.classList.add("hidden");
       if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar o upload das fotos.";
+    }
+  }
+
+  function saveImages() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+    } catch (e) {
+      showToast('⚠ Armazenamento cheio. Remova algumas fotos.');
     }
   }
 
@@ -421,8 +408,7 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       
-      // Envia tanto o Index quando o ID do banco (se existir) para deletar
-      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i}, ${img.id || null}, '${img.data}')">Remover</button>` : '';
+      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>` : '';
 
       item.innerHTML = `
         <img src="${img.data}" alt="${img.name}" loading="lazy">
@@ -436,8 +422,7 @@
     });
   }
 
-  // ── Adicionar fotos (Envia o arquivo pro Storage e o link pro Banco) ──
-  document.getElementById('file-input').addEventListener('change', async function () {
+  document.getElementById('file-input').addEventListener('change', function () {
     if (!IS_ADMIN) {
       alert("Acesso negado.");
       return;
@@ -446,90 +431,40 @@
     const files = Array.from(this.files);
     if (!files.length) return;
 
-    showToast('Enviando para a nuvem de Asgard...');
-
-    for (const file of files) {
-      const nomeUnicoStorage = `${Date.now()}_${file.name}`;
-
-      // 1. Envia o arquivo físico para a pasta (Bucket) no Supabase Storage
-      const { error: storageError } = await supabase.storage
-        .from('galeria')
-        .upload(nomeUnicoStorage, file);
-
-      if (storageError) {
-        alert("Erro no upload do arquivo: " + storageError.message);
-        continue;
-      }
-
-      // 2. Captura o link da URL pública da foto enviada
-      const { data: urlData } = supabase.storage
-        .from('galeria')
-        .getPublicUrl(nomeUnicoStorage);
-        
-      const linkPublicoUrl = urlData.publicUrl;
-
-      // 3. Salva a linha com informações na tabela "fotos"
-      const { error: dbError } = await supabase
-        .from('Fotos')
-        .insert([{ nome: file.name, url: linkPublicoUrl }]);
-
-      if (dbError) {
-        alert("Erro ao registrar no banco de dados: " + dbError.message);
-      }
-    }
-
-    showToast('Galeria sincronizada na nuvem!');
-    loadImages(); 
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        images.push({ name: file.name, data: e.target.result });
+        loaded++;
+        if (loaded === files.length) {
+          saveImages();
+          renderGallery();
+          showToast(`${files.length} foto${files.length > 1 ? 's' : ''} adicionada${files.length > 1 ? 's' : ''}!`);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
     this.value = '';
   });
 
-  // ── Deletar Foto (Remove da tela, remove da tabela e apaga do Storage) ──
-  async function deleteImage(e, index, idBanco, urlCompleta) {
+  function deleteImage(e, index) {
     if (!IS_ADMIN) return;
     e.stopPropagation();
-    
-    if (!confirm('Deseja remover essa foto da nuvem de forma permanente para todos?')) return;
-
-    showToast('Removendo do sistema...');
-
-    // Se a imagem veio da nuvem (possui ID cadastrado)
-    if (idBanco) {
-      const nomeArquivoStorage = urlCompleta.split('/').pop();
-      
-      // 1. Apaga o registro da tabela
-      const { error: dbError } = await supabase.from('fotos').delete().eq('id', idBanco);
-      // 2. Apaga o arquivo físico da pasta em nuvem
-      await supabase.storage.from('galeria').remove([nomeArquivoStorage]);
-
-      if (dbError) {
-        alert("Erro ao deletar do banco: " + dbError.message);
-        return;
-      }
-    } else {
-      // Fallback: Se for uma das fotos padrões locais do código, remove apenas da visualização temporária
-      images.splice(index, 1);
-    }
-
+    images.splice(index, 1);
+    saveImages();
+    renderGallery();
     showToast('Foto removida.');
-    loadImages();
   }
 
-  // ── Limpar tudo (Apenas Admin) ──
-  async function clearAll() {
-    if (!IS_ADMIN || !confirm('Deseja apagar TODOS os registros salvos na nuvem?')) return;
-    
-    showToast('Limpando registros...');
-    const { error } = await supabase.from('fotos').delete().gt('id', 0);
-    
-    if (!error) {
-      showToast('Banco de dados limpo!');
-      loadImages();
-    } else {
-      alert("Erro ao limpar dados: " + error.message);
-    }
+  function clearAll() {
+    if (!IS_ADMIN || !confirm('Remover todas as fotos da galeria?')) return;
+    images = [];
+    saveImages();
+    renderGallery();
+    showToast('Galeria limpa.');
   }
 
-  // ── Lightbox ──
   function openLightbox(i) {
     lightboxIndex = i;
     document.getElementById('lightbox-img').src = images[i].data;
