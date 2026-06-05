@@ -1,364 +1,32 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Galeria</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0b0b0b;
-    --surface: #111;
-    --border: #003366;
-    --text: #cceeff;
-    --muted: #0088ff;
-    --accent: #00aaff;
-    --radius: 4px;
-  }
-
-  body {
-    background: 
-      linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)),
-      url("fundo.png");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
-    min-height: 100vh;
-  }
-
-  header {
-    padding: 3rem 2rem 2rem;
-    border-bottom: 1px solid var(--accent);
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    background: black;
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 400;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-shadow: 0 0 10px #0088ff;
-  }
-
-  header h1 span {
-    color: white;
-    text-shadow: none;
-  }
-
-  #photo-count {
-    font-size: 14px;
-    color: var(--text);
-    font-weight: bold;
-    letter-spacing: 0.05em;
-  }
-
-  .toolbar {
-    padding: 1.25rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.5);
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
-    font-family: Arial, sans-serif;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.3s;
-    background: var(--surface);
-    color: var(--accent);
-    letter-spacing: 0.02em;
-  }
-
-  .btn:hover { border-color: var(--accent); background: #001a33; box-shadow: 0 0 10px #0088ff; }
-
-  .btn-accent {
-    background: #001a33;
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .btn-accent:hover { background: var(--accent); color: #000; }
-
-  .btn-danger { color: #e06c6c; border-color: rgba(224,108,108,0.4); }
-  .btn-danger:hover { border-color: #e06c6c; background: rgba(224,108,108,0.2); box-shadow: 0 0 10px #e06c6c; }
-
-  #file-input { display: none; }
-
-  .gallery {
-    padding: 2rem;
-    columns: 4 220px;
-    gap: 10px;
-  }
-
-  .gallery-item {
-    break-inside: avoid;
-    margin-bottom: 10px;
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    transition: 0.3s;
-  }
-
-  .gallery-item img {
-    width: 100%;
-    display: block;
-    transition: transform 0.3s;
-  }
-
-  .gallery-item:hover {
-    box-shadow: 0 0 15px #0088ff;
-    border-color: var(--accent);
-  }
-
-  .gallery-item:hover img { transform: scale(1.05); }
-
-  .gallery-item .overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 12px;
-  }
-
-  .gallery-item:hover .overlay { opacity: 1; }
-
-  .overlay .img-name {
-    font-size: 12px;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 6px;
-    font-weight: bold;
-  }
-
-  .overlay .del-btn {
-    align-self: flex-end;
-    background: rgba(224,108,108,0.9);
-    border: none;
-    border-radius: 3px;
-    color: #fff;
-    font-size: 11px;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: background 0.15s;
-    font-weight: bold;
-  }
-
-  .overlay .del-btn:hover { background: #c85454; box-shadow: 0 0 5px #ff4d4d; }
-
-  .empty-state {
-    padding: 5rem 2rem;
-    text-align: center;
-    display: none;
-  }
-
-  .empty-state.visible { display: block; }
-
-  .empty-state svg {
-    width: 56px;
-    height: 56px;
-    stroke: var(--accent);
-    filter: drop-shadow(0 0 5px #0088ff);
-    margin-bottom: 1.25rem;
-  }
-
-  .empty-state p {
-    color: var(--text);
-    font-size: 15px;
-    margin-bottom: 1.5rem;
-  }
-
-  .hidden { display: none !important; }
-
-  /* Lightbox */
-  #lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  #lightbox.open { display: flex; }
-
-  #lightbox img {
-    max-width: 90vw;
-    max-height: 88vh;
-    object-fit: contain;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    box-shadow: 0 0 30px rgba(0,170,255,0.5);
-  }
-
-  #lightbox-close {
-    position: fixed;
-    top: 1.25rem;
-    right: 1.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    font-size: 22px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-  }
-
-  #lightbox-close:hover { border-color: var(--accent); color: white; box-shadow: 0 0 10px #0088ff; }
-
-  #lightbox-prev, #lightbox-next {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    font-size: 20px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-  }
-
-  #lightbox-prev { left: 1.25rem; }
-  #lightbox-next { right: 1.25rem; }
-  #lightbox-prev:hover, #lightbox-next:hover { border-color: var(--accent); color: white; box-shadow: 0 0 10px #0088ff; }
-
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #001a33;
-    border: 1px solid var(--accent);
-    color: #fff;
-    font-size: 13px;
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none;
-    z-index: 2000;
-    white-space: nowrap;
-    box-shadow: 0 0 10px rgba(0,170,255,0.3);
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  @media (max-width: 600px) {
-    header { padding: 2rem 1rem 1.25rem; flex-direction: column; align-items: center; text-align: center; }
-    .toolbar { padding: 1rem; flex-wrap: wrap; justify-content: center; }
-    .gallery { padding: 1rem; columns: 2 140px; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <h1>Minha <span>Galeria</span></h1>
-  <span id="photo-count">0 fotos</span>
-</header>
-
-<div class="toolbar" id="admin-toolbar">
-  <button class="btn btn-accent" onclick="document.getElementById('file-input').click()">
-    ＋ Adicionar fotos
-  </button>
-  <button class="btn btn-danger" onclick="clearAll()" id="clear-btn" style="display:none">
-    Limpar tudo
-  </button>
-  <input type="file" id="file-input" accept="image/*" multiple>
-</div>
-
-<div class="empty-state visible" id="empty-state">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
-  </svg>
-  <p>Nenhuma foto ainda.<br><span id="msg-permissao">Clique em "Adicionar fotos" para começar.</span></p>
-</div>
-
-<div class="gallery" id="gallery"></div>
-
-<div id="lightbox">
-  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-  <button id="lightbox-prev" onclick="navigateLightbox(-1)">&#8592;</button>
-  <img id="lightbox-img" src="" alt="">
-  <button id="lightbox-next" onclick="navigateLightbox(1)">&#8594;</button>
-</div>
-
-<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  const STORAGE_KEY = 'asgard_fotos'; 
+  // CONFIGURAÇÃO DO SEU BANCO DE DADOS (Substitua com os seus dados do Supabase)
+  const SUPABASE_URL = "SUA_PROJECT_URL_AQUI";
+  const SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY_AQUI";
+  
+  // Conecta o site com o banco de dados
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   let images = [];
   let lightboxIndex = 0;
-  
   const IS_ADMIN = sessionStorage.getItem("asgard_admin_logado") === "true";
 
-  function loadImages() {
+  // ── Carregar do Banco de Dados em Nuvem (Supabase) ──
+  async function loadImages() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        images = parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
-      } else {
-        images = [
-          { name: "Treino 1", data: "fotos/foto1.jpeg" },
-          { name: "Treino 2", data: "fotos/foto2.jpeg" },
-          { name: "Treino 3", data: "fotos/foto3.jpeg" },
-          { name: "Treino 4", data: "fotos/foto4.jpeg" },
-          { name: "Treino 5", data: "fotos/foto5.jpeg" },
-          { name: "Treino 6", data: "fotos/foto6.jpeg" },
-          { name: "Treino 7", data: "fotos/foto7.jpeg" },
-          { name: "Treino 8", data: "fotos/foto8.jpeg" },
-          { name: "Treino 9", data: "fotos/foto9.jpeg" },
-          { name: "Treino 10", data: "fotos/foto10.jpeg" },
-        ];
-      }
+      // Busca todas as linhas da tabela "fotos" ordenando pelas mais recentes
+      const { data, error } = await supabase
+        .from('fotos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Se o banco estiver vazio, você pode mapear fotos estáticas locais temporariamente
+      images = data || [];
     } catch (e) {
+      console.error("Erro ao carregar fotos da nuvem:", e);
       images = [];
     }
     
@@ -373,14 +41,6 @@
     if (!IS_ADMIN) {
       if (toolbar) toolbar.classList.add("hidden");
       if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar o upload das fotos.";
-    }
-  }
-
-  function saveImages() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-    } catch (e) {
-      showToast('⚠ Armazenamento cheio. Remova algumas fotos.');
     }
   }
 
@@ -408,12 +68,12 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       
-      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>` : '';
+      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${img.id}, '${img.url}')">Remover</button>` : '';
 
       item.innerHTML = `
-        <img src="${img.data}" alt="${img.name}" loading="lazy">
+        <img src="${img.url}" alt="${img.nome}" loading="lazy">
         <div class="overlay">
-          <span class="img-name">${img.name}</span>
+          <span class="img-name">${img.nome}</span>
           ${botaoRemover}
         </div>`;
         
@@ -422,7 +82,8 @@
     });
   }
 
-  document.getElementById('file-input').addEventListener('change', function () {
+  // ── Adicionar fotos na Nuvem (Storage + Banco de Dados) ──
+  document.getElementById('file-input').addEventListener('change', async function () {
     if (!IS_ADMIN) {
       alert("Acesso negado.");
       return;
@@ -431,43 +92,89 @@
     const files = Array.from(this.files);
     if (!files.length) return;
 
-    let loaded = 0;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        images.push({ name: file.name, data: e.target.result });
-        loaded++;
-        if (loaded === files.length) {
-          saveImages();
-          renderGallery();
-          showToast(`${files.length} foto${files.length > 1 ? 's' : ''} adicionada${files.length > 1 ? 's' : ''}!`);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    showToast('Enviando arquivos para a nuvem de Asgard...');
+
+    for (const file of files) {
+      // 1. Gera um nome único para o arquivo não sobrescrever outros
+      const nomeArquivo = `${Date.now()}_${file.name}`;
+
+      // 2. Faz o upload do arquivo físico para o Storage do Supabase
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('galeria')
+        .upload(nomeArquivo, file);
+
+      if (storageError) {
+        alert("Erro no upload do arquivo: " + storageError.message);
+        continue;
+      }
+
+      // 3. Pega o link público gerado para essa imagem
+      const { data: publicUrlData } = supabase.storage
+        .from('galeria')
+        .getPublicUrl(nomeArquivo);
+        
+      const linkPublico = publicUrlData.publicUrl;
+
+      // 4. Salva o link e o nome na tabela "fotos" do banco
+      const { error: dbError } = await supabase
+        .from('fotos')
+        .insert([{ nome: file.name, url: linkPublico }]);
+
+      if (dbError) {
+        alert("Erro ao registrar foto no banco: " + dbError.message);
+      }
+    }
+
+    showToast('Galeria atualizada na nuvem!');
+    loadImages(); // Recarrega a galeria trazendo os dados novos da nuvem
     this.value = '';
   });
 
-  function deleteImage(e, index) {
+  // ── Deletar da Nuvem (Deleta o registro e o arquivo físico) ──
+  async function deleteImage(e, id, urlCompleta) {
     if (!IS_ADMIN) return;
     e.stopPropagation();
-    images.splice(index, 1);
-    saveImages();
-    renderGallery();
-    showToast('Foto removida.');
+    
+    if (!confirm("Tem certeza que deseja deletar essa foto para sempre de todos os usuários?")) return;
+
+    // Extrai o nome do arquivo a partir da URL para deletar do Storage também
+    const nomeArquivo = urlCompleta.split('/').pop();
+
+    showToast('Removendo da nuvem...');
+
+    // 1. Deleta da tabela
+    const { error: dbError } = await supabase.from('fotos').delete().eq('id', id);
+    
+    // 2. Deleta do Storage
+    await supabase.storage.from('galeria').remove([nomeArquivo]);
+
+    if (!dbError) {
+      showToast('Foto removida com sucesso!');
+      loadImages();
+    } else {
+      alert("Erro ao deletar: " + dbError.message);
+    }
   }
 
-  function clearAll() {
-    if (!IS_ADMIN || !confirm('Remover todas as fotos da galeria?')) return;
-    images = [];
-    saveImages();
-    renderGallery();
-    showToast('Galeria limpa.');
+  // ── Limpar Tudo (Apenas Admin) ──
+  async function clearAll() {
+    if (!IS_ADMIN || !confirm('REMOVER ABSOLUTAMENTE TODAS AS FOTOS DA NUVEM?')) return;
+    
+    showToast('Limpando banco de dados...');
+    
+    // Deleta tudo da tabela (Filtro para deletar IDs maiores que zero)
+    const { error } = await supabase.from('fotos').delete().gt('id', 0);
+    
+    if (!error) {
+      showToast('Galeria limpa. Lembre-se de limpar os arquivos do Storage manualmente se desejar.');
+      loadImages();
+    }
   }
 
+  // ── Lightbox (Exibição ampliada) ──
   function openLightbox(i) {
     lightboxIndex = i;
-    document.getElementById('lightbox-img').src = images[i].data;
+    document.getElementById('lightbox-img').src = images[i].url;
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -479,7 +186,7 @@
 
   function navigateLightbox(dir) {
     lightboxIndex = (lightboxIndex + dir + images.length) % images.length;
-    document.getElementById('lightbox-img').src = images[lightboxIndex].data;
+    document.getElementById('lightbox-img').src = images[lightboxIndex].url;
   }
 
   document.getElementById('lightbox').addEventListener('click', function (e) {
@@ -499,11 +206,9 @@
     if (t) {
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
   }
 
   loadImages();
 </script>
-</body>
-</html>
