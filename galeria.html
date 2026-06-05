@@ -365,7 +365,7 @@
     try {
       // Puxa os dados da tabela "fotos" do Supabase
       const { data, error } = await supabase
-        .from('fotos')
+        .from('Fotos')
         .select('*')
         .order('id', { ascending: true });
 
@@ -470,7 +470,7 @@
 
       // 3. Salva a linha com informações na tabela "fotos"
       const { error: dbError } = await supabase
-        .from('fotos')
+        .from('Fotos')
         .insert([{ nome: file.name, url: linkPublicoUrl }]);
 
       if (dbError) {
