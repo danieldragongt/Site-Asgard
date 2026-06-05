@@ -157,37 +157,18 @@
 <section id="horarios">
   <h2>Horários</h2>
   <div class="table-container">
-    <table>
-      <tr>
-        <th>Modalidade</th>
-        <th>Dias</th>
-        <th>Horário</th>
-      </tr>
-      <tr>
-        <td>Muay Thai</td>
-        <td>Seg / Qua / Sex</td>
-        <td>18h às 19h</td>
-      </tr>
-      <tr>
-        <td>Muay Thai</td>
-        <td>Seg / Qua / Sex</td>
-        <td>19h às 20h</td>
-      </tr>
-      <tr>
-        <td>Muay Thai</td>
-        <td>Seg / Qua / Sex</td>
-        <td>20h às 21h</td>
-      </tr>
-      <tr>
-        <td>Muay Thai</td>
-        <td>Ter / Qui</td>
-        <td>18h às 19h</td>
-      </tr>
-      <tr>
-        <td>Boxe</td>
-        <td>Ter / Qui</td>
-        <td>19h às 20h</td>
-      </tr>
+    <table id="tabelaHorarios">
+      <thead>
+        <tr>
+          <th>Modalidade</th>
+          <th>Dias</th>
+          <th>Horário</th>
+          <th class="col-admin hidden">Ações</th> <!-- Adicionada a classe aqui -->
+        </tr>
+      </thead>
+      <tbody id="corpoTabelaHorarios">
+        <!-- O Javascript vai carregar as linhas de horários aqui -->
+      </tbody>
     </table>
   </div>
 </section>
@@ -421,11 +402,17 @@
     }
   }
 
-  function mostrarBotoesAdminTabela(mostrar) {
+function mostrarBotoesAdminTabela(mostrar) {
     const colunasAdmin = document.querySelectorAll(".col-admin");
     colunasAdmin.forEach(col => {
-      if(mostrar) col.classList.remove("hidden");
-      else col.classList.add("hidden");
+      if (mostrar) {
+        col.classList.remove("hidden");
+        // Força a tabela a exibir a coluna de forma correta (como célula ou cabeçalho)
+        col.style.display = col.tagName === "TH" ? "table-cell" : "table-cell";
+      } else {
+        col.classList.add("hidden");
+        col.style.style.display = "none";
+      }
     });
   }
 
