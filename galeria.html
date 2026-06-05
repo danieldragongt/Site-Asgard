@@ -5,64 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minha Galeria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0e0e0e;
-    --surface: #1a1a1a;
-    --border: rgba(255,255,255,0.08);
-    --text: #f0ede6;
-    --muted: #888;
-    --accent: #c9a96e;
-    --accent-dim: rgba(201,169,110,0.12);
+    --bg: #0b0b0b;
+    --surface: #111;
+    --border: #003366;
+    --text: #cceeff;
+    --muted: #0088ff;
+    --accent: #00aaff;
     --radius: 4px;
   }
 
   body {
-    background: var(--bg);
-    color: var(--text); /* CORRIGIDO: Era black, mudamos para var(--text) para aparecer no fundo escuro */
-    font-family: 'DM Sans', sans-serif;
+    background: 
+      linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)),
+      url("fundo.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
     min-height: 100vh;
   }
 
   header {
     padding: 3rem 2rem 2rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--accent);
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem;
+    background: black;
   }
 
   header h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cinzel', serif;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     font-weight: 400;
-    letter-spacing: -0.02em;
-    color: var(--text);
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-shadow: 0 0 10px #0088ff;
   }
 
   header h1 span {
-    color: var(--accent);
+    color: white;
+    text-shadow: none;
   }
 
   #photo-count {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: bold;
     letter-spacing: 0.05em;
   }
 
-  /* Toolbar oculta por padrão, controlada via JS */
   .toolbar {
     padding: 1.25rem 2rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.5);
   }
 
   .btn {
@@ -70,31 +77,30 @@
     align-items: center;
     gap: 8px;
     padding: 9px 18px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: bold;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     cursor: pointer;
-    transition: all 0.18s;
+    transition: all 0.3s;
     background: var(--surface);
-    color: var(--text);
+    color: var(--accent);
     letter-spacing: 0.02em;
   }
 
-  .btn:hover { border-color: rgba(255,255,255,0.22); background: #222; }
+  .btn:hover { border-color: var(--accent); background: #001a33; box-shadow: 0 0 10px #0088ff; }
 
   .btn-accent {
-    background: var(--accent);
-    color: #0e0e0e;
+    background: #001a33;
+    color: var(--accent);
     border-color: var(--accent);
-    font-weight: 500;
   }
 
-  .btn-accent:hover { background: #d4b07c; border-color: #d4b07c; }
+  .btn-accent:hover { background: var(--accent); color: #000; }
 
-  .btn-danger { color: #e06c6c; }
-  .btn-danger:hover { border-color: #e06c6c; background: rgba(224,108,108,0.08); }
+  .btn-danger { color: #e06c6c; border-color: rgba(224,108,108,0.4); }
+  .btn-danger:hover { border-color: #e06c6c; background: rgba(224,108,108,0.2); box-shadow: 0 0 10px #e06c6c; }
 
   #file-input { display: none; }
 
@@ -108,25 +114,31 @@
     break-inside: avoid;
     margin-bottom: 10px;
     position: relative;
-    border-radius: var(--radius);
+    border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
     background: var(--surface);
     border: 1px solid var(--border);
+    transition: 0.3s;
   }
 
   .gallery-item img {
     width: 100%;
     display: block;
-    transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+    transition: transform 0.3s;
   }
 
-  .gallery-item:hover img { transform: scale(1.04); }
+  .gallery-item:hover {
+    box-shadow: 0 0 15px #0088ff;
+    border-color: var(--accent);
+  }
+
+  .gallery-item:hover img { transform: scale(1.05); }
 
   .gallery-item .overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
     opacity: 0;
     transition: opacity 0.2s;
     display: flex;
@@ -138,28 +150,29 @@
   .gallery-item:hover .overlay { opacity: 1; }
 
   .overlay .img-name {
-    font-size: 11px;
-    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 6px;
+    font-weight: bold;
   }
 
   .overlay .del-btn {
     align-self: flex-end;
-    background: rgba(224,108,108,0.85);
+    background: rgba(224,108,108,0.9);
     border: none;
     border-radius: 3px;
     color: #fff;
     font-size: 11px;
-    font-family: 'DM Sans', sans-serif;
     padding: 4px 10px;
     cursor: pointer;
     transition: background 0.15s;
+    font-weight: bold;
   }
 
-  .overlay .del-btn:hover { background: #c85454; }
+  .overlay .del-btn:hover { background: #c85454; box-shadow: 0 0 5px #ff4d4d; }
 
   .empty-state {
     padding: 5rem 2rem;
@@ -172,18 +185,17 @@
   .empty-state svg {
     width: 56px;
     height: 56px;
-    stroke: var(--muted);
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 5px #0088ff);
     margin-bottom: 1.25rem;
   }
 
   .empty-state p {
-    color: var(--muted);
+    color: var(--text);
     font-size: 15px;
-    font-weight: 300;
     margin-bottom: 1.5rem;
   }
 
-  /* Classes de controle de visibilidade */
   .hidden { display: none !important; }
 
   /* Lightbox */
@@ -191,7 +203,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0,0,0,0.95);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -204,17 +216,18 @@
     max-width: 90vw;
     max-height: 88vh;
     object-fit: contain;
-    border-radius: var(--radius);
-    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 30px rgba(0,170,255,0.5);
   }
 
   #lightbox-close {
     position: fixed;
     top: 1.25rem;
     right: 1.5rem;
-    background: none;
+    background: var(--surface);
     border: 1px solid var(--border);
-    color: var(--text);
+    color: var(--accent);
     font-size: 22px;
     width: 40px;
     height: 40px;
@@ -223,10 +236,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.15s;
+    transition: 0.3s;
   }
 
-  #lightbox-close:hover { border-color: rgba(255,255,255,0.35); }
+  #lightbox-close:hover { border-color: var(--accent); color: white; box-shadow: 0 0 10px #0088ff; }
 
   #lightbox-prev, #lightbox-next {
     position: fixed;
@@ -234,7 +247,7 @@
     transform: translateY(-50%);
     background: var(--surface);
     border: 1px solid var(--border);
-    color: var(--text);
+    color: var(--accent);
     font-size: 20px;
     width: 44px;
     height: 44px;
@@ -243,21 +256,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.15s;
+    transition: 0.3s;
   }
 
   #lightbox-prev { left: 1.25rem; }
   #lightbox-next { right: 1.25rem; }
-  #lightbox-prev:hover, #lightbox-next:hover { border-color: rgba(255,255,255,0.35); }
+  #lightbox-prev:hover, #lightbox-next:hover { border-color: var(--accent); color: white; box-shadow: 0 0 10px #0088ff; }
 
   .toast {
     position: fixed;
     bottom: 1.5rem;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
+    background: #001a33;
+    border: 1px solid var(--accent);
+    color: #fff;
     font-size: 13px;
     padding: 10px 20px;
     border-radius: var(--radius);
@@ -266,6 +279,7 @@
     pointer-events: none;
     z-index: 2000;
     white-space: nowrap;
+    box-shadow: 0 0 10px rgba(0,170,255,0.3);
   }
 
   .toast.show {
@@ -274,8 +288,8 @@
   }
 
   @media (max-width: 600px) {
-    header { padding: 2rem 1rem 1.25rem; }
-    .toolbar { padding: 1rem; flex-wrap: wrap; }
+    header { padding: 2rem 1rem 1.25rem; flex-direction: column; align-items: center; text-align: center; }
+    .toolbar { padding: 1rem; flex-wrap: wrap; justify-content: center; }
     .gallery { padding: 1rem; columns: 2 140px; }
   }
 </style>
@@ -318,24 +332,19 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ATENÇÃO: Mudamos a chave para sincronizar com as imagens inseridas na home
   const STORAGE_KEY = 'asgard_fotos'; 
   let images = [];
   let lightboxIndex = 0;
   
-  // VERIFICAÇÃO SE É ADMIN: checa se a sessão do admin está ativa
   const IS_ADMIN = sessionStorage.getItem("asgard_admin_logado") === "true";
 
-  // ── Carregar do localStorage ──
   function loadImages() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      // Suporta tanto o formato antigo string[] quanto o novo {name, data}[]
       if (raw) {
         const parsed = JSON.parse(raw);
         images = parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
       } else {
-        // Se estiver vazio, gera imagens iniciais padrão
         images = [
           { name: "Treino 1", data: "galeria1.png" },
           { name: "Treino 2", data: "muaythai.png" },
@@ -351,7 +360,6 @@
       images = [];
     }
     
-    // Aplica a regra de segurança visual assim que carrega
     ajustarVisaoAdmin();
     renderGallery();
   }
@@ -361,8 +369,8 @@
     const msgPermissao = document.getElementById("msg-permissao");
     
     if (!IS_ADMIN) {
-      toolbar.classList.add("hidden"); // Esconde botões de adicionar e limpar tudo
-      if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar upload de fotos.";
+      if (toolbar) toolbar.classList.add("hidden");
+      if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar o upload das fotos.";
     }
   }
 
@@ -374,30 +382,30 @@
     }
   }
 
-  // ── Renderizar galeria ──
   function renderGallery() {
     const gallery = document.getElementById('gallery');
     const empty   = document.getElementById('empty-state');
     const count   = document.getElementById('photo-count');
     const clearBtn= document.getElementById('clear-btn');
 
+    if (!gallery) return;
     gallery.innerHTML = '';
     count.textContent = `${images.length} foto${images.length !== 1 ? 's' : ''}`;
     
-    // Só mostra o botão limpar se tiver imagens E se for o Admin
-    clearBtn.style.display = (images.length && IS_ADMIN) ? 'inline-flex' : 'none';
+    if (clearBtn) {
+      clearBtn.style.display = (images.length && IS_ADMIN) ? 'inline-flex' : 'none';
+    }
 
     if (images.length === 0) {
-      empty.classList.add('visible');
+      if (empty) empty.classList.add('visible');
       return;
     }
-    empty.classList.remove('visible');
+    if (empty) empty.classList.remove('visible');
 
     images.forEach((img, i) => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
       
-      // O botão "Remover" só será incluído no HTML se for o administrador logado
       const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>` : '';
 
       item.innerHTML = `
@@ -412,10 +420,9 @@
     });
   }
 
-  // ── Adicionar fotos (Bloqueado por segurança caso tentem forçar via console) ──
   document.getElementById('file-input').addEventListener('change', function () {
     if (!IS_ADMIN) {
-      alert("Acesso negado. Apenas administradores podem enviar fotos.");
+      alert("Acesso negado.");
       return;
     }
 
@@ -439,7 +446,6 @@
     this.value = '';
   });
 
-  // ── Deletar ──
   function deleteImage(e, index) {
     if (!IS_ADMIN) return;
     e.stopPropagation();
@@ -457,7 +463,6 @@
     showToast('Galeria limpa.');
   }
 
-  // ── Lightbox ──
   function openLightbox(i) {
     lightboxIndex = i;
     document.getElementById('lightbox-img').src = images[i].data;
@@ -487,15 +492,15 @@
     if (e.key === 'ArrowRight') navigateLightbox(1);
   });
 
-  // ── Toast ──
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    if (t) {
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
   }
 
-  // ── Init ──
   loadImages();
 </script>
 </body>
