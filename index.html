@@ -255,17 +255,16 @@
     return fotosPadrao;
   }
 
-  function renderizarGaleria() {
+function renderizarGaleria() {
     const fotos = obterFotos();
     const container = document.getElementById("containerFotos");
     if (!container) return;
     container.innerHTML = "";
     
-    fotos.forEach((foto, index) => {
+    fotos.forEach((foto) => {
       container.innerHTML += `
         <div class="img-container">
           <img src="${foto.data}" alt="${foto.name}">
-          <button class="btn-delete-pic" onclick="removerFoto(${index})">X</button>
         </div>
       `;
     });
