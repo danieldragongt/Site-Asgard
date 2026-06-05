@@ -231,39 +231,31 @@
 </footer>
 
 <a href="https://wa.me/5531985232297" class="whatsapp">💬</a>
-
 <script>
-  // Hash SHA-256 para a senha: Admin123!
-  const CHAVE_MESTRA_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
-
-  // Função para criptografar o que for digitado
-  async function gerarHashSHA256(texto) {
-    const msgBuffer = new TextEncoder().encode(texto);                    
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
+  // Função para abrir o modal de login
   function abrirModalLogin(e) {
     e.preventDefault();
     document.getElementById("modalLogin").classList.remove("hidden");
     document.getElementById("senhaAdminInput").focus();
   }
 
+  // Função para fechar o modal
   function fecharModalLogin() {
     document.getElementById("modalLogin").classList.add("hidden");
     document.getElementById("senhaAdminInput").value = "";
     document.getElementById("erroAdmin").innerText = "";
   }
 
-  async function autenticarAdmin() {
+  // Validação direta da senha
+  function autenticarAdmin() {
     const senhaDigitada = document.getElementById("senhaAdminInput").value;
     const campoErro = document.getElementById("erroAdmin");
     
-    const hashDigitado = await gerarHashSHA256(senhaDigitada);
-
-    if (hashDigitado === CHAVE_MESTRA_HASH) {
+    // DEFINA SUA SENHA DIRETAMENTE AQUI:
+    // Troque "Admin123!" pela senha que você quiser
+    if (senhaDigitada === "Admin123!") {
       fecharModalLogin();
+      
       // Mostra o painel secreto e rola a página até ele
       const painel = document.getElementById("painelAdmin");
       painel.classList.remove("hidden");
@@ -273,12 +265,14 @@
     }
   }
 
+  // Permite o "Enter" no teclado
   function verificarTeclado(event) {
     if (event.key === "Enter") {
       autenticarAdmin();
     }
   }
 
+  // Função para deslogar
   function deslogarAdmin() {
     document.getElementById("painelAdmin").classList.add("hidden");
     window.scrollTo({ top: 0, behavior: 'smooth' });
