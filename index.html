@@ -273,7 +273,6 @@
     const fotos = localStorage.getItem("asgard_fotos");
     if (fotos) {
       const parsed = JSON.parse(fotos);
-      // Garante que converte o formato antigo se necessário
       return parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
     }
     return fotosPadrao;
@@ -338,20 +337,57 @@
 
     lista.forEach((item, index) => {
       corpoTabela.innerHTML += `
-        <tr>
-          <td>${item.mod}</td>
-          <td>${item.dias}</td>
-          <td>${item.hora}</td>
+        <tr id="linha-horario-${index}">
+          <td class="dado-mod">${item.mod}</td>
+          <td class="dado-dias">${item.dias}</td>
+          <td class="dado-hora">${item.hora}</td>
           <td class="col-admin hidden">
+            <button style="background:#b392ac; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:5px;" onclick="habilitarEdicaoHorario(${index})">Editar</button>
             <button style="background:#ff4d4d; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;" onclick="removerHorario(${index})">Excluir</button>
           </td>
         </tr>
       `;
     });
     
+    // Recarrega exibindo os botões se o modo admin estiver ativo
     if(document.body.classList.contains("admin-mode")) {
       mostrarBotoesAdminTabela(true);
     }
+  }
+
+  function habilitarEdicaoHorario(index) {
+    const linha = document.getElementById(`linha-horario-${index}`);
+    
+    const modAtual = linha.querySelector(".dado-mod").innerText;
+    const diasAtual = linha.querySelector(".dado-dias").innerText;
+    const horaAtual = linha.querySelector(".dado-hora").innerText;
+    
+    linha.querySelector(".dado-mod").innerHTML = `<input type="text" id="edit-mod-${index}" value="${modAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
+    linha.querySelector(".dado-dias").innerHTML = `<input type="text" id="edit-dias-${index}" value="${diasAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
+    linha.querySelector(".dado-hora").innerHTML = `<input type="text" id="edit-hora-${index}" value="${horaAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
+    
+    linha.querySelector(".col-admin").innerHTML = `
+      <button style="background:#28a745; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:5px;" onclick="salvarEdicaoHorario(${index})">Salvar</button>
+      <button style="background:#6c757d; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;" onclick="renderizarHorarios()">Cancelar</button>
+    `;
+  }
+
+  function salvarEdicaoHorario(index) {
+    const novoMod = document.getElementById(`edit-mod-${index}`).value;
+    const novoDias = document.getElementById(`edit-dias-${index}`).value;
+    const novoHora = document.getElementById(`edit-hora-${index}`).value;
+    
+    if (!novoMod || !novoDias || !novoHora) {
+      alert("Nenhum campo pode ficar em branco!");
+      return;
+    }
+    
+    const lista = obterHorarios();
+    lista[index] = { mod: novoMod, dias: novoDias, hora: novoHora };
+    localStorage.setItem("asgard_horarios", JSON.stringify(lista));
+    
+    renderizarHorarios();
+    alert("Horário alterado com sucesso!");
   }
 
   function adicionarNovoHorario() {
@@ -368,72 +404,12 @@
     lista.push({ mod, dias, hora });
     localStorage.setItem("asgard_horarios", JSON.stringify(lista));
     
- function renderizarHorarios() {
-    const lista = obterHorarios();
-    const corpoTabela = document.getElementById("corpoTabelaHorarios");
-    if (!corpoTabela) return;
-    corpoTabela.innerHTML = "";
-
-    lista.forEach((item, index) => {
-      corpoTabela.innerHTML += `
-        <tr id="linha-horario-${index}">
-          <td class="dado-mod">${item.mod}</td>
-          <td class="dado-dias">${item.dias}</td>
-          <td class="dado-hora">${item.hora}</td>
-          <td class="col-admin hidden">
-            <button style="background:#b392ac; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:5px;" onclick="habilitarEdicaoHorario(${index})">Editar</button>
-            <button style="background:#ff4d4d; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;" onclick="removerHorario(${index})">Excluir</button>
-          </td>
-        </tr>
-      `;
-    });
-    
-    if(document.body.classList.contains("admin-mode")) {
-      mostrarBotoesAdminTabela(true);
-    }
-  }
-
-  function habilitarEdicaoHorario(index) {
-    const linha = document.getElementById(`linha-horario-${index}`);
-    
-    // Pega os valores atuais que já estão escritos na tabela
-    const modAtual = linha.querySelector(".dado-mod").innerText;
-    const diasAtual = linha.querySelector(".dado-dias").innerText;
-    const horaAtual = linha.querySelector(".dado-hora").innerText;
-    
-    // Transforma as células em campos de entrada (inputs)
-    linha.querySelector(".dado-mod").innerHTML = `<input type="text" id="edit-mod-${index}" value="${modAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
-    linha.querySelector(".dado-dias").innerHTML = `<input type="text" id="edit-dias-${index}" value="${diasAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
-    linha.querySelector(".dado-hora").innerHTML = `<input type="text" id="edit-hora-${index}" value="${horaAtual}" style="width:100%; padding:4px; background:#333; color:#fff; border:1px solid #d4af37;">`;
-    
-    // Altera os botões para "Salvar" e "Cancelar"
-    linha.querySelector(".col-admin").innerHTML = `
-      <button style="background:#28a745; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:5px;" onclick="salvarEdicaoHorario(${index})">Salvar</button>
-      <button style="background:#6c757d; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;" onclick="renderizarHorarios()">Cancelar</button>
-    `;
-  }
-
-  function salvarEdicaoHorario(index) {
-    // Pega os novos valores digitados pelo usuário
-    const novoMod = document.getElementById(`edit-mod-${index}`).value;
-    const novoDias = document.getElementById(`edit-dias-${index}`).value;
-    const novoHora = document.getElementById(`edit-hora-${index}`).value;
-    
-    if (!novoMod || !novoDias || !novoHora) {
-      alert("Nenhum campo pode ficar em branco!");
-      return;
-    }
-    
-    // Atualiza a lista oficial de horários
-    const lista = obterHorarios();
-    lista[index] = { mod: novoMod, dias: novoDias, hora: novoHora };
-    
-    // Salva no banco de dados local do navegador
-    localStorage.setItem("asgard_horarios", JSON.stringify(lista));
-    
-    // Recarrega a tabela atualizada na tela
     renderizarHorarios();
-    alert("Horário alterado com sucesso!");
+
+    document.getElementById("formModalidade").value = "";
+    document.getElementById("formDias").value = "";
+    document.getElementById("formHorario").value = "";
+    alert("Horário adicionado com sucesso!");
   }
 
   function removerHorario(index) {
@@ -473,7 +449,6 @@
     if (senhaDigitada === SENHA_CORRETA) {
       fecharModalLogin();
       
-      // Salva a sessão para a página de galeria saber que você é o admin
       sessionStorage.setItem("asgard_admin_logado", "true");
       
       document.body.classList.add("admin-mode");
@@ -490,7 +465,6 @@
   }
 
   function deslogarAdmin() {
-    // Remove a permissão de administrador ao sair
     sessionStorage.removeItem("asgard_admin_logado");
     
     document.body.classList.remove("admin-mode");
