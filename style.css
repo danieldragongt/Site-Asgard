@@ -71,7 +71,7 @@ nav a:hover{
   height:100vh;
   background:
     linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-    url("fundo.png");
+    url("logoasgard.png");
   background-size:cover;
   background-position:center;
   display:flex;
@@ -525,3 +525,63 @@ body.admin-mode .btn-delete-pic {
   box-shadow: 0 0 20px #0088ff; /* Efeito de brilho neon */
   transform: scale(1.05); /* Leve aumento de tamanho */
 }
+
+ /* --- ESTILOS EXTRAS PARA O SISTEMA DE ADMIN --- */
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Modal de Login */
+  .admin-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    background: #111;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 2px solid #d4af37; /* Dourado combinando com Asgard */
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+    font-family: 'Cinzel', serif;
+  }
+  .modal-content h3 { margin-bottom: 15px; color: #d4af37; }
+  .modal-content input[type="password"] {
+    width: 100%; padding: 10px; margin: 15px 0;
+    border: 1px solid #444; background: #222; color: #fff;
+    border-radius: 4px; text-align: center;
+  }
+  .modal-content button {
+    padding: 10px 20px; background: #d4af37; color: #000;
+    border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+  }
+  .modal-content .close-btn {
+    background: #555; color: #fff; margin-left: 10px;
+  }
+  .error-msg { color: #ff4d4d; font-size: 14px; margin-top: 10px; }
+
+  /* Seção do Painel do Administrador */
+  #painelAdmin {
+    background: #161616;
+    color: #fff;
+    border-top: 3px solid #d4af37;
+    border-bottom: 3px solid #d4af37;
+  }
+  .admin-box {
+    max-width: 1200px; margin: 0 auto; padding: 40px 20px;
+  }
+  .admin-box h2 { color: #d4af37; font-family: 'Cinzel', serif; }
+  .btn-logout {
+    background: #ff4d4d; color: white; border: none;
+    padding: 8px 15px; cursor: pointer; border-radius: 4px; margin-top: 20px;
+  }
+  .admin-link {
+    color: #666; text-decoration: none; font-size: 12px; margin-left: 15px;
+    transition: color 0.3s;
+  }
+  .admin-link:hover { color: #d4af37; }
