@@ -7,6 +7,67 @@
 <title>CT Asgard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  /* --- ESTILOS EXTRAS PARA O SISTEMA DE ADMIN --- */
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Modal de Login */
+  .admin-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    background: #111;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 2px solid #d4af37; /* Dourado combinando com Asgard */
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+    font-family: 'Cinzel', serif;
+  }
+  .modal-content h3 { margin-bottom: 15px; color: #d4af37; }
+  .modal-content input[type="password"] {
+    width: 100%; padding: 10px; margin: 15px 0;
+    border: 1px solid #444; background: #222; color: #fff;
+    border-radius: 4px; text-align: center;
+  }
+  .modal-content button {
+    padding: 10px 20px; background: #d4af37; color: #000;
+    border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+  }
+  .modal-content .close-btn {
+    background: #555; color: #fff; margin-left: 10px;
+  }
+  .error-msg { color: #ff4d4d; font-size: 14px; margin-top: 10px; }
+
+  /* Seção do Painel do Administrador */
+  #painelAdmin {
+    background: #161616;
+    color: #fff;
+    border-top: 3px solid #d4af37;
+    border-bottom: 3px solid #d4af37;
+  }
+  .admin-box {
+    max-width: 1200px; margin: 0 auto; padding: 40px 20px;
+  }
+  .admin-box h2 { color: #d4af37; font-family: 'Cinzel', serif; }
+  .btn-logout {
+    background: #ff4d4d; color: white; border: none;
+    padding: 8px 15px; cursor: pointer; border-radius: 4px; margin-top: 20px;
+  }
+  .admin-link {
+    color: #666; text-decoration: none; font-size: 12px; margin-left: 15px;
+    transition: color 0.3s;
+  }
+  .admin-link:hover { color: #d4af37; }
+</style>
 </head>
 
 <body>
@@ -118,7 +179,7 @@
         <td>20h às 21h</td>
       </tr>
       <tr>
-        <td>Muay Thai Kids</td>
+        <td>Muay Thai</td>
         <td>Ter / Qui</td>
         <td>18h às 19h</td>
       </tr>
@@ -138,12 +199,91 @@
   <p>📷 Instagram: <a href="https://www.instagram.com/ctasgard/" target="_blank" rel="noopener noreferrer">Veja no Instagram</a></p>
 </section>
 
+<section id="painelAdmin" class="hidden">
+  <div class="admin-box">
+    <h2>Valhala - Painel do Administrador</h2>
+    <p>Este conteúdo é 100% restrito a você.</p>
+    
+    <div style="background: #222; padding: 15px; margin-top: 15px; border-radius: 4px;">
+      <h3>Área de Trabalho</h3>
+      <p>O painel foi carregado com sucesso. Adicione seus controles aqui.</p>
+    </div>
+
+    <button class="btn-logout" onclick="deslogarAdmin()">Fechar Painel</button>
+  </div>
+</section>
+
+<div id="modalLogin" class="admin-modal hidden">
+  <div class="modal-content">
+    <h3>Acesso Restrito</h3>
+    <p>Insira a chave de Asgard:</p>
+    <input type="password" id="senhaAdminInput" placeholder="Senha secreta" onkeypress="verificarTeclado(event)">
+    <div id="erroAdmin" class="error-msg"></div>
+    <div style="margin-top: 15px;">
+      <button onclick="autenticarAdmin()">Entrar</button>
+      <button class="close-btn" onclick="fecharModalLogin()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <footer>
-  <p>© 2026 CT Asgard</p>
+  <p>© 2026 CT Asgard <a href="#" class="admin-link" onclick="abrirModalLogin(event)">Admin</a></p>
 </footer>
 
 <a href="https://wa.me/5531985232297" class="whatsapp">💬</a>
 
+<script>
+  // Hash SHA-256 para a senha: Admin123!
+  const CHAVE_MESTRA_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+
+  // Função para criptografar o que for digitado
+  async function gerarHashSHA256(texto) {
+    const msgBuffer = new TextEncoder().encode(texto);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function abrirModalLogin(e) {
+    e.preventDefault();
+    document.getElementById("modalLogin").classList.remove("hidden");
+    document.getElementById("senhaAdminInput").focus();
+  }
+
+  function fecharModalLogin() {
+    document.getElementById("modalLogin").classList.add("hidden");
+    document.getElementById("senhaAdminInput").value = "";
+    document.getElementById("erroAdmin").innerText = "";
+  }
+
+  async function autenticarAdmin() {
+    const senhaDigitada = document.getElementById("senhaAdminInput").value;
+    const campoErro = document.getElementById("erroAdmin");
+    
+    const hashDigitado = await gerarHashSHA256(senhaDigitada);
+
+    if (hashDigitado === CHAVE_MESTRA_HASH) {
+      fecharModalLogin();
+      // Mostra o painel secreto e rola a página até ele
+      const painel = document.getElementById("painelAdmin");
+      painel.classList.remove("hidden");
+      painel.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      campoErro.innerText = "Chave incorreta! Acesso negado.";
+    }
+  }
+
+  function verificarTeclado(event) {
+    if (event.key === "Enter") {
+      autenticarAdmin();
+    }
+  }
+
+  function deslogarAdmin() {
+    document.getElementById("painelAdmin").classList.add("hidden");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
 </body>
 </html>
-
