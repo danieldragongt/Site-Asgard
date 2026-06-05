@@ -22,7 +22,7 @@
 
   body {
     background: var(--bg);
-    color: black;
+    color: var(--text); /* CORRIGIDO: Era black, mudamos para var(--text) para aparecer no fundo escuro */
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
   }
@@ -56,6 +56,7 @@
     letter-spacing: 0.05em;
   }
 
+  /* Toolbar oculta por padrão, controlada via JS */
   .toolbar {
     padding: 1.25rem 2rem;
     display: flex;
@@ -182,6 +183,9 @@
     margin-bottom: 1.5rem;
   }
 
+  /* Classes de controle de visibilidade */
+  .hidden { display: none !important; }
+
   /* Lightbox */
   #lightbox {
     display: none;
@@ -283,7 +287,7 @@
   <span id="photo-count">0 fotos</span>
 </header>
 
-<div class="toolbar">
+<div class="toolbar" id="admin-toolbar">
   <button class="btn btn-accent" onclick="document.getElementById('file-input').click()">
     ＋ Adicionar fotos
   </button>
@@ -299,12 +303,11 @@
     <circle cx="8.5" cy="8.5" r="1.5"/>
     <polyline points="21 15 16 10 5 21"/>
   </svg>
-  <p>Nenhuma foto ainda.<br>Clique em "Adicionar fotos" para começar.</p>
+  <p>Nenhuma foto ainda.<br><span id="msg-permissao">Clique em "Adicionar fotos" para começar.</span></p>
 </div>
 
 <div class="gallery" id="gallery"></div>
 
-<!-- Lightbox -->
 <div id="lightbox">
   <button id="lightbox-close" onclick="closeLightbox()">✕</button>
   <button id="lightbox-prev" onclick="navigateLightbox(-1)">&#8592;</button>
@@ -315,19 +318,52 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const STORAGE_KEY = 'gallery_images_v1';
+  // ATENÇÃO: Mudamos a chave para sincronizar com as imagens inseridas na home
+  const STORAGE_KEY = 'asgard_fotos'; 
   let images = [];
   let lightboxIndex = 0;
+  
+  // VERIFICAÇÃO SE É ADMIN: checa se a sessão do admin está ativa
+  const IS_ADMIN = sessionStorage.getItem("asgard_admin_logado") === "true";
 
   // ── Carregar do localStorage ──
   function loadImages() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      images = raw ? JSON.parse(raw) : [];
+      // Suporta tanto o formato antigo string[] quanto o novo {name, data}[]
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        images = parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
+      } else {
+        // Se estiver vazio, gera imagens iniciais padrão
+        images = [
+          { name: "Treino 1", data: "galeria1.png" },
+          { name: "Treino 2", data: "muaythai.png" },
+          { name: "Treino 3", data: "muaythaikids.png" },
+          { name: "Treino 4", data: "jiujitsu.png" },
+          { name: "Treino 5", data: "galeria4.png" },
+          { name: "Treino 6", data: "galeria5.png" },
+          { name: "Treino 7", data: "galeria6.png" },
+          { name: "Treino 8", data: "logoasgard.png" }
+        ];
+      }
     } catch (e) {
       images = [];
     }
+    
+    // Aplica a regra de segurança visual assim que carrega
+    ajustarVisaoAdmin();
     renderGallery();
+  }
+
+  function ajustarVisaoAdmin() {
+    const toolbar = document.getElementById("admin-toolbar");
+    const msgPermissao = document.getElementById("msg-permissao");
+    
+    if (!IS_ADMIN) {
+      toolbar.classList.add("hidden"); // Esconde botões de adicionar e limpar tudo
+      if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar upload de fotos.";
+    }
   }
 
   function saveImages() {
@@ -347,7 +383,9 @@
 
     gallery.innerHTML = '';
     count.textContent = `${images.length} foto${images.length !== 1 ? 's' : ''}`;
-    clearBtn.style.display = images.length ? 'inline-flex' : 'none';
+    
+    // Só mostra o botão limpar se tiver imagens E se for o Admin
+    clearBtn.style.display = (images.length && IS_ADMIN) ? 'inline-flex' : 'none';
 
     if (images.length === 0) {
       empty.classList.add('visible');
@@ -358,19 +396,29 @@
     images.forEach((img, i) => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
+      
+      // O botão "Remover" só será incluído no HTML se for o administrador logado
+      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>` : '';
+
       item.innerHTML = `
         <img src="${img.data}" alt="${img.name}" loading="lazy">
         <div class="overlay">
           <span class="img-name">${img.name}</span>
-          <button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>
+          ${botaoRemover}
         </div>`;
+        
       item.querySelector('img').addEventListener('click', () => openLightbox(i));
       gallery.appendChild(item);
     });
   }
 
-  // ── Adicionar fotos ──
+  // ── Adicionar fotos (Bloqueado por segurança caso tentem forçar via console) ──
   document.getElementById('file-input').addEventListener('change', function () {
+    if (!IS_ADMIN) {
+      alert("Acesso negado. Apenas administradores podem enviar fotos.");
+      return;
+    }
+
     const files = Array.from(this.files);
     if (!files.length) return;
 
@@ -393,6 +441,7 @@
 
   // ── Deletar ──
   function deleteImage(e, index) {
+    if (!IS_ADMIN) return;
     e.stopPropagation();
     images.splice(index, 1);
     saveImages();
@@ -401,7 +450,7 @@
   }
 
   function clearAll() {
-    if (!confirm('Remover todas as fotos da galeria?')) return;
+    if (!IS_ADMIN || !confirm('Remover todas as fotos da galeria?')) return;
     images = [];
     saveImages();
     renderGallery();

@@ -247,24 +247,24 @@
   }
 
   // Validação direta da senha
-  function autenticarAdmin() {
-    const senhaDigitada = document.getElementById("senhaAdminInput").value;
-    const campoErro = document.getElementById("erroAdmin");
+function autenticarAdmin() {
+  const senhaDigitada = document.getElementById("senhaAdminInput").value;
+  const campoErro = document.getElementById("erroAdmin");
+  
+  if (senhaDigitada === SENHA_CORRETA) {
+    fecharModalLogin();
     
-    // DEFINA SUA SENHA DIRETAMENTE AQUI:
-    // Troque "Admin123!" pela senha que você quiser
-    if (senhaDigitada === "Admin123!") {
-      fecharModalLogin();
-      
-      // Mostra o painel secreto e rola a página até ele
-      const painel = document.getElementById("painelAdmin");
-      painel.classList.remove("hidden");
-      painel.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      campoErro.innerText = "Chave incorreta! Acesso negado.";
-    }
+    // --> ADICIONE ESSA LINHA AQUI ABAIXO PARA AVISAR A GALERIA:
+    sessionStorage.setItem("asgard_admin_logado", "true");
+    
+    document.body.classList.add("admin-mode");
+    document.getElementById("painelAdmin").classList.remove("hidden");
+    mostrarBotoesAdminTabela(true);
+    document.getElementById("painelAdmin").scrollIntoView({ behavior: 'smooth' });
+  } else {
+    campoErro.innerText = "Chave incorreta! Acesso negado.";
   }
-
+}
   // Permite o "Enter" no teclado
   function verificarTeclado(event) {
     if (event.key === "Enter") {
@@ -276,6 +276,7 @@
   function deslogarAdmin() {
     document.getElementById("painelAdmin").classList.add("hidden");
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    sessionStorage.removeItem("asgard_admin_logado");
   }
 </script>
 
