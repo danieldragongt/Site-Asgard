@@ -335,10 +335,11 @@
 
 <script>
   // INSIRA SUAS CHAVES COPIADAS DO SEU PAINEL SUPABASE AQUI:
-  const SUPABASE_URL = "https://roqpruqjmehdatlyfmiw.supabase.co/rest/v1/";
-  const SUPABASE_KEY = "sb_publishable_HFTjOhnkQDa5Vu6awnskYA_XyCbSius";
+  const SUPABASE_URL = "SUA_PROJECT_URL_AQUI";
+  const SUPABASE_KEY = "SUA_PUBLISHABLE_KEY_AQUI";
   
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // CORRIGIDO: Mudamos o nome da variável para supabaseClient para não dar conflito
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let images = [];
   let lightboxIndex = 0;
@@ -362,8 +363,7 @@
   // ── Carregar do Banco na Nuvem ──
   async function loadImages() {
     try {
-      // Puxa as linhas diretamente do banco mapeando a sua tabela "Fotos" com F maiúsculo
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('Fotos')
         .select('*')
         .order('id', { ascending: true });
@@ -371,7 +371,6 @@
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Converte a estrutura da nuvem para o formato esperado pelo seu lightbox {name, data}
         images = data.map(img => ({ id: img.id, name: img.nome, data: img.url }));
       } else {
         images = fotosLocaisPadrao;
@@ -419,7 +418,6 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       
-      // Passa o ID do banco (caso exista) para exclusão remota precisa
       const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i}, ${img.id || null}, '${img.data}')">Remover</button>` : '';
 
       item.innerHTML = `
@@ -449,8 +447,8 @@
     for (const file of files) {
       const nomeUnicoStorage = `${Date.now()}_${file.name}`;
 
-      // 1. Envia arquivo para o Storage (pasta 'galeria')
-      const { error: storageError } = await supabase.storage
+      // 1. Envia arquivo para o Storage
+      const { error: storageError } = await supabaseClient.storage
         .from('galeria')
         .upload(nomeUnicoStorage, file);
 
@@ -459,15 +457,15 @@
         continue;
       }
 
-      // 2. Coleta URL pública gerada
-      const { data: urlData } = supabase.storage
+      // 2. Coleta URL pública
+      const { data: urlData } = supabaseClient.storage
         .from('galeria')
         .getPublicUrl(nomeUnicoStorage);
         
       const urlFinalPublica = urlData.publicUrl;
 
-      // 3. Salva link permanente na tabela "Fotos" (F maiúsculo)
-      const { error: dbError } = await supabase
+      // 3. Salva link na tabela "Fotos"
+      const { error: dbError } = await supabaseClient
         .from('Fotos')
         .insert([{ nome: file.name, url: urlFinalPublica }]);
 
@@ -493,18 +491,17 @@
     if (idBanco) {
       const nomeArquivoOriginal = urlCompleta.split('/').pop();
       
-      // 1. Limpa registro da tabela "Fotos"
-      const { error: dbError } = await supabase.from('Fotos').delete().eq('id', idBanco);
+      // 1. Limpa registro da tabela
+      const { error: dbError } = await supabaseClient.from('Fotos').delete().eq('id', idBanco);
       
-      // 2. Deleta arquivo físico do Bucket 'galeria'
-      await supabase.storage.from('galeria').remove([nomeArquivoOriginal]);
+      // 2. Deleta arquivo do Bucket
+      await supabaseClient.storage.from('galeria').remove([nomeArquivoOriginal]);
 
       if (dbError) {
         alert("Erro ao remover registro: " + dbError.message);
         return;
       }
     } else {
-      // Caso queira tirar da visão caso use fallback local estático
       images.splice(index, 1);
     }
 
@@ -512,12 +509,12 @@
     loadImages();
   }
 
-  // ── Limpar Banco (Apenas Admin) ──
+  // ── Limpar Banco ──
   async function clearAll() {
     if (!IS_ADMIN || !confirm('Deseja limpar todos os registros da tabela na nuvem?')) return;
     
     showToast('Esvaziando banco...');
-    const { error } = await supabase.from('Fotos').delete().gt('id', 0);
+    const { error } = await supabaseClient.from('Fotos').delete().gt('id', 0);
     
     if (!error) {
       showToast('Tabela redefinida com sucesso.');
