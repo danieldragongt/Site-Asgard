@@ -232,53 +232,212 @@
 
 <a href="https://wa.me/5531985232297" class="whatsapp">💬</a>
 <script>
-  // Função para abrir o modal de login
+  // Senha padrão configurada
+  const SENHA_CORRETA = "Admin123!";
+
+  // --- DADOS PADRÕES INICIAIS (Caso o localStorage esteja vazio) ---
+  const fotosPadrao = [
+    { name: "Treino 1", data: "galeria1.png" },
+    { name: "Treino 2", data: "muaythai.png" },
+    { name: "Treino 3", data: "muaythaikids.png" },
+    { name: "Treino 4", data: "jiujitsu.png" },
+    { name: "Treino 5", data: "galeria4.png" },
+    { name: "Treino 6", data: "galeria5.png" },
+    { name: "Treino 7", data: "galeria6.png" },
+    { name: "Treino 8", data: "logoasgard.png" }
+  ];
+
+  const horariosPadrao = [
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "18h às 19h" },
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "19h às 20h" },
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "20h às 21h" },
+    { mod: "Muay Thai Kids", dias: "Ter / Qui", hora: "18h às 19h" },
+    { mod: "Boxe", dias: "Ter / Qui", hora: "19h às 20h" }
+  ];
+
+  // Ao carregar a página, verifica se já estava logado e renderiza tudo
+  window.onload = function() {
+    renderizarGaleria();
+    renderizarHorarios();
+    
+    // Se o admin já estava logado antes de atualizar a página, mantém logado
+    if (sessionStorage.getItem("asgard_admin_logado") === "true") {
+      document.body.classList.add("admin-mode");
+      document.getElementById("painelAdmin").classList.remove("hidden");
+      mostrarBotoesAdminTabela(true);
+    }
+  };
+
+  // --- FUNÇÕES DA GALERIA ---
+  function obterFotos() {
+    const fotos = localStorage.getItem("asgard_fotos");
+    if (fotos) {
+      const parsed = JSON.parse(fotos);
+      // Garante que converte o formato antigo se necessário
+      return parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
+    }
+    return fotosPadrao;
+  }
+
+  function renderizarGaleria() {
+    const fotos = obterFotos();
+    const container = document.getElementById("containerFotos");
+    if (!container) return;
+    container.innerHTML = "";
+    
+    fotos.forEach((foto, index) => {
+      container.innerHTML += `
+        <div class="img-container">
+          <img src="${foto.data}" alt="${foto.name}">
+          <button class="btn-delete-pic" onclick="removerFoto(${index})">X</button>
+        </div>
+      `;
+    });
+  }
+
+  function adicionarFotoGaleira() {
+    const inputFile = document.getElementById("inputNovaFoto");
+    if (inputFile.files && inputFile.files[0]) {
+      const leitor = new FileReader();
+      
+      leitor.onload = function(e) {
+        const fotos = obterFotos();
+        fotos.push({ name: inputFile.files[0].name, data: e.target.result });
+        localStorage.setItem("asgard_fotos", JSON.stringify(fotos));
+        renderizarGaleria();
+        inputFile.value = "";
+        alert("Foto adicionada com sucesso!");
+      };
+      
+      leitor.readAsDataURL(inputFile.files[0]);
+    } else {
+      alert("Por favor, selecione uma imagem primeiro.");
+    }
+  }
+
+  function removerFoto(index) {
+    if(confirm("Tem certeza que deseja apagar esta foto?")) {
+      const fotos = obterFotos();
+      fotos.splice(index, 1);
+      localStorage.setItem("asgard_fotos", JSON.stringify(fotos));
+      renderizarGaleria();
+    }
+  }
+
+  // --- FUNÇÕES DOS HORÁRIOS ---
+  function obterHorarios() {
+    const dados = localStorage.getItem("asgard_horarios");
+    return dados ? JSON.parse(dados) : horariosPadrao;
+  }
+
+  function renderizarHorarios() {
+    const lista = obterHorarios();
+    const corpoTabela = document.getElementById("corpoTabelaHorarios");
+    if (!corpoTabela) return;
+    corpoTabela.innerHTML = "";
+
+    lista.forEach((item, index) => {
+      corpoTabela.innerHTML += `
+        <tr>
+          <td>${item.mod}</td>
+          <td>${item.dias}</td>
+          <td>${item.hora}</td>
+          <td class="col-admin hidden">
+            <button style="background:#ff4d4d; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;" onclick="removerHorario(${index})">Excluir</button>
+          </td>
+        </tr>
+      `;
+    });
+    
+    if(document.body.classList.contains("admin-mode")) {
+      mostrarBotoesAdminTabela(true);
+    }
+  }
+
+  function adicionarNovoHorario() {
+    const mod = document.getElementById("formModalidade").value;
+    const dias = document.getElementById("formDias").value;
+    const hora = document.getElementById("formHorario").value;
+
+    if (!mod || !dias || !hora) {
+      alert("Preencha todos os campos do horário!");
+      return;
+    }
+
+    const lista = obterHorarios();
+    lista.push({ mod, dias, hora });
+    localStorage.setItem("asgard_horarios", JSON.stringify(lista));
+    
+    renderizarHorarios();
+
+    document.getElementById("formModalidade").value = "";
+    document.getElementById("formDias").value = "";
+    document.getElementById("formHorario").value = "";
+    alert("Horário adicionado com sucesso!");
+  }
+
+  function removerHorario(index) {
+    if(confirm("Deseja mesmo remover esse horário?")) {
+      const lista = obterHorarios();
+      lista.splice(index, 1);
+      localStorage.setItem("asgard_horarios", JSON.stringify(lista));
+      renderizarHorarios();
+    }
+  }
+
+  function mostrarBotoesAdminTabela(mostrar) {
+    const colunasAdmin = document.querySelectorAll(".col-admin");
+    colunasAdmin.forEach(col => {
+      if(mostrar) col.classList.remove("hidden");
+      else col.classList.add("hidden");
+    });
+  }
+
+  // --- FUNÇÕES DO MODAL DE LOGIN ---
   function abrirModalLogin(e) {
     e.preventDefault();
     document.getElementById("modalLogin").classList.remove("hidden");
     document.getElementById("senhaAdminInput").focus();
   }
 
-  // Função para fechar o modal
   function fecharModalLogin() {
     document.getElementById("modalLogin").classList.add("hidden");
     document.getElementById("senhaAdminInput").value = "";
     document.getElementById("erroAdmin").innerText = "";
   }
 
-  // Validação direta da senha
-function autenticarAdmin() {
-  const senhaDigitada = document.getElementById("senhaAdminInput").value;
-  const campoErro = document.getElementById("erroAdmin");
-  
-  if (senhaDigitada === SENHA_CORRETA) {
-    fecharModalLogin();
+  function autenticarAdmin() {
+    const senhaDigitada = document.getElementById("senhaAdminInput").value;
+    const campoErro = document.getElementById("erroAdmin");
     
-    // --> ADICIONE ESSA LINHA AQUI ABAIXO PARA AVISAR A GALERIA:
-    sessionStorage.setItem("asgard_admin_logado", "true");
-    
-    document.body.classList.add("admin-mode");
-    document.getElementById("painelAdmin").classList.remove("hidden");
-    mostrarBotoesAdminTabela(true);
-    document.getElementById("painelAdmin").scrollIntoView({ behavior: 'smooth' });
-  } else {
-    campoErro.innerText = "Chave incorreta! Acesso negado.";
-  }
-}
-  // Permite o "Enter" no teclado
-  function verificarTeclado(event) {
-    if (event.key === "Enter") {
-      autenticarAdmin();
+    if (senhaDigitada === SENHA_CORRETA) {
+      fecharModalLogin();
+      
+      // Salva a sessão para a página de galeria saber que você é o admin
+      sessionStorage.setItem("asgard_admin_logado", "true");
+      
+      document.body.classList.add("admin-mode");
+      document.getElementById("painelAdmin").classList.remove("hidden");
+      mostrarBotoesAdminTabela(true);
+      document.getElementById("painelAdmin").scrollIntoView({ behavior: 'smooth' });
+    } else {
+      campoErro.innerText = "Chave incorreta! Acesso negado.";
     }
   }
 
-  // Função para deslogar
+  function verificarTeclado(event) {
+    if (event.key === "Enter") autenticarAdmin();
+  }
+
   function deslogarAdmin() {
-    document.getElementById("painelAdmin").classList.add("hidden");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Remove a permissão de administrador ao sair
     sessionStorage.removeItem("asgard_admin_logado");
+    
+    document.body.classList.remove("admin-mode");
+    document.getElementById("painelAdmin").classList.add("hidden");
+    mostrarBotoesAdminTabela(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
-
 </body>
 </html>
