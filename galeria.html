@@ -331,35 +331,54 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  const STORAGE_KEY = 'asgard_fotos'; 
+  // INSIRA SUAS CHAVES COPIADAS DO SEU PAINEL SUPABASE AQUI:
+  const SUPABASE_URL = "COLE_A_SUA_PROJECT_URL_AQUI";
+  const SUPABASE_KEY = "COLE_A_SUA_PUBLISHABLE_KEY_AQUI";
+  
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   let images = [];
   let lightboxIndex = 0;
   
   const IS_ADMIN = sessionStorage.getItem("asgard_admin_logado") === "true";
 
-  function loadImages() {
+  // Seus arquivos padrões locais definidos por você
+  const fotosLocaisPadrao = [
+    { name: "Treino 1", data: "fotos/foto1.jpeg" },
+    { name: "Treino 2", data: "fotos/foto2.jpeg" },
+    { name: "Treino 3", data: "fotos/foto3.jpeg" },
+    { name: "Treino 4", data: "fotos/foto4.jpeg" },
+    { name: "Treino 5", data: "fotos/foto5.jpeg" },
+    { name: "Treino 6", data: "fotos/foto6.jpeg" },
+    { name: "Treino 7", data: "fotos/foto7.jpeg" },
+    { name: "Treino 8", data: "fotos/foto8.jpeg" },
+    { name: "Treino 9", data: "fotos/foto9.jpeg" },
+    { name: "Treino 10", data: "fotos/foto10.jpeg" },
+  ];
+
+  // ── Carregar do Banco na Nuvem ──
+  async function loadImages() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        images = parsed.map(img => typeof img === 'string' ? {name: 'Imagem', data: img} : img);
+      // Puxa as linhas diretamente do banco mapeando a sua tabela "Fotos" com F maiúsculo
+      const { data, error } = await supabase
+        .from('Fotos')
+        .select('*')
+        .order('id', { ascending: true });
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Converte a estrutura da nuvem para o formato esperado pelo seu lightbox {name, data}
+        images = data.map(img => ({ id: img.id, name: img.nome, data: img.url }));
       } else {
-        images = [
-          { name: "Treino 1", data: "fotos/foto1.jpeg" },
-          { name: "Treino 2", data: "fotos/foto2.jpeg" },
-          { name: "Treino 3", data: "fotos/foto3.jpeg" },
-          { name: "Treino 4", data: "fotos/foto4.jpeg" },
-          { name: "Treino 5", data: "fotos/foto5.jpeg" },
-          { name: "Treino 6", data: "fotos/foto6.jpeg" },
-          { name: "Treino 7", data: "fotos/foto7.jpeg" },
-          { name: "Treino 8", data: "fotos/foto8.jpeg" },
-          { name: "Treino 9", data: "fotos/foto9.jpeg" },
-          { name: "Treino 10", data: "fotos/foto10.jpeg" },
-        ];
+        images = fotosLocaisPadrao;
       }
     } catch (e) {
-      images = [];
+      console.error("Erro na nuvem, carregando fallback local:", e);
+      images = fotosLocaisPadrao;
     }
     
     ajustarVisaoAdmin();
@@ -373,14 +392,6 @@
     if (!IS_ADMIN) {
       if (toolbar) toolbar.classList.add("hidden");
       if (msgPermissao) msgPermissao.textContent = "Aguarde o administrador realizar o upload das fotos.";
-    }
-  }
-
-  function saveImages() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-    } catch (e) {
-      showToast('⚠ Armazenamento cheio. Remova algumas fotos.');
     }
   }
 
@@ -408,7 +419,8 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       
-      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i})">Remover</button>` : '';
+      // Passa o ID do banco (caso exista) para exclusão remota precisa
+      const botaoRemover = IS_ADMIN ? `<button class="del-btn" onclick="deleteImage(event, ${i}, ${img.id || null}, '${img.data}')">Remover</button>` : '';
 
       item.innerHTML = `
         <img src="${img.data}" alt="${img.name}" loading="lazy">
@@ -422,7 +434,8 @@
     });
   }
 
-  document.getElementById('file-input').addEventListener('change', function () {
+  // ── Sincronizar Upload com Armazenamento e Tabela ──
+  document.getElementById('file-input').addEventListener('change', async function () {
     if (!IS_ADMIN) {
       alert("Acesso negado.");
       return;
@@ -431,40 +444,90 @@
     const files = Array.from(this.files);
     if (!files.length) return;
 
-    let loaded = 0;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        images.push({ name: file.name, data: e.target.result });
-        loaded++;
-        if (loaded === files.length) {
-          saveImages();
-          renderGallery();
-          showToast(`${files.length} foto${files.length > 1 ? 's' : ''} adicionada${files.length > 1 ? 's' : ''}!`);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    showToast('Subindo imagens para a nuvem...');
+
+    for (const file of files) {
+      const nomeUnicoStorage = `${Date.now()}_${file.name}`;
+
+      // 1. Envia arquivo para o Storage (pasta 'galeria')
+      const { error: storageError } = await supabase.storage
+        .from('galeria')
+        .upload(nomeUnicoStorage, file);
+
+      if (storageError) {
+        alert("Erro no upload do arquivo físico: " + storageError.message);
+        continue;
+      }
+
+      // 2. Coleta URL pública gerada
+      const { data: urlData } = supabase.storage
+        .from('galeria')
+        .getPublicUrl(nomeUnicoStorage);
+        
+      const urlFinalPublica = urlData.publicUrl;
+
+      // 3. Salva link permanente na tabela "Fotos" (F maiúsculo)
+      const { error: dbError } = await supabase
+        .from('Fotos')
+        .insert([{ nome: file.name, url: urlFinalPublica }]);
+
+      if (dbError) {
+        alert("Erro ao gravar dados na tabela Fotos: " + dbError.message);
+      }
+    }
+
+    showToast(`Fotos integradas na nuvem com sucesso!`);
+    loadImages();
     this.value = '';
   });
 
-  function deleteImage(e, index) {
+  // ── Deletar Remotamente da Nuvem ──
+  async function deleteImage(e, index, idBanco, urlCompleta) {
     if (!IS_ADMIN) return;
     e.stopPropagation();
-    images.splice(index, 1);
-    saveImages();
-    renderGallery();
-    showToast('Foto removida.');
+    
+    if (!confirm('Deseja deletar permanentemente esta imagem de todos os dispositivos?')) return;
+
+    showToast('Processando exclusão...');
+
+    if (idBanco) {
+      const nomeArquivoOriginal = urlCompleta.split('/').pop();
+      
+      // 1. Limpa registro da tabela "Fotos"
+      const { error: dbError } = await supabase.from('Fotos').delete().eq('id', idBanco);
+      
+      // 2. Deleta arquivo físico do Bucket 'galeria'
+      await supabase.storage.from('galeria').remove([nomeArquivoOriginal]);
+
+      if (dbError) {
+        alert("Erro ao remover registro: " + dbError.message);
+        return;
+      }
+    } else {
+      // Caso queira tirar da visão caso use fallback local estático
+      images.splice(index, 1);
+    }
+
+    showToast('Foto excluída.');
+    loadImages();
   }
 
-  function clearAll() {
-    if (!IS_ADMIN || !confirm('Remover todas as fotos da galeria?')) return;
-    images = [];
-    saveImages();
-    renderGallery();
-    showToast('Galeria limpa.');
+  // ── Limpar Banco (Apenas Admin) ──
+  async function clearAll() {
+    if (!IS_ADMIN || !confirm('Deseja limpar todos os registros da tabela na nuvem?')) return;
+    
+    showToast('Esvaziando banco...');
+    const { error } = await supabase.from('Fotos').delete().gt('id', 0);
+    
+    if (!error) {
+      showToast('Tabela redefinida com sucesso.');
+      loadImages();
+    } else {
+      alert("Erro na redefinição: " + error.message);
+    }
   }
 
+  // ── Lightbox e Navegação ──
   function openLightbox(i) {
     lightboxIndex = i;
     document.getElementById('lightbox-img').src = images[i].data;
