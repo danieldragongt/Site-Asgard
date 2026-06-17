@@ -171,16 +171,23 @@ Nossa equipe trabalha para proporcionar um ensino de qualidade, focando não ape
     { name: "Treino 10", data: "fotos/foto10.jpeg"}
   ];
 
-  const horariosPadrao = [
-    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "18h às 19h" },
-    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "19h às 20h" },
-    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "20h às 21h" },
-    { mod: "Muay Thai Kids", dias: "Ter / Qui", hora: "18h às 19h" },
-    { mod: "Jiu-Jitsu", dias: "Seg / Qua / Sex", hora: "17h às 18h"},
-    { mod: "Jiu-Jitsu", dias: "Ter / Qui", hora: "20h às 21h"},
-    { mod: "Boxe", dias: "Ter / Qui", hora: "19h às 20h" },
-  ];
-
+{horariosPadrao.map((h) => (
+  <tr key={h.id}>
+    <td>{h.mod}</td>
+    <td>{h.dias}</td>
+    <td>{h.hora}</td>
+  </tr>
+))}
+  
+const horariosPadrao = [
+  { id: 1, mod: "Muay Thai",      dias: "Seg / Qua / Sex", hora: "18h às 19h" },
+  { id: 2, mod: "Muay Thai",      dias: "Seg / Qua / Sex", hora: "19h às 20h" },
+  { id: 3, mod: "Muay Thai",      dias: "Seg / Qua / Sex", hora: "20h às 21h" },
+  { id: 4, mod: "Muay Thai Kids", dias: "Ter / Qui",        hora: "18h às 19h" },
+  { id: 5, mod: "Jiu-Jitsu",      dias: "Seg / Qua / Sex", hora: "17h às 18h" },
+  { id: 6, mod: "Jiu-Jitsu",      dias: "Ter / Qui",        hora: "19h às 20h" },
+  { id: 7, mod: "Boxe",           dias: "Ter / Qui",        hora: "19h às 20h" },
+];
   // Ao carregar a página, verifica se já estava logado e renderiza tudo
   window.onload = function() {
     renderizarGaleria();
