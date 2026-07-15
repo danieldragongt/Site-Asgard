@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modalidade | CT Asgard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ===== Página de Modalidade ===== */
+  .mod-hero{
+    margin-top:70px;
+    position:relative;
+    height:45vh;
+    min-height:280px;
+    display:flex;
+    align-items:flex-end;
+    background-size:cover;
+    background-position:center;
+    overflow:hidden;
+  }
+
+  .mod-hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, #0b0b0b 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.35) 100%);
+  }
+
+  .mod-hero-content{
+    position:relative;
+    z-index:2;
+    padding:0 8% 30px;
+    width:100%;
+  }
+
+  .mod-voltar{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:#66d9ff;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:14px;
+    text-shadow:0 0 8px rgba(0,0,0,0.8);
+  }
+
+  .mod-voltar:hover{ color:#fff; }
+
+  .mod-hero h1{
+    font-family:'Cinzel', serif;
+    font-size:clamp(32px, 5vw, 56px);
+    letter-spacing:2px;
+    color:#66ccff;
+    text-shadow:0 0 10px #00aaff, 0 0 25px #0066ff;
+  }
+
+  .mod-hero p{
+    color:#cceeff;
+    font-size:18px;
+    margin-top:6px;
+  }
+
+  .mod-content{
+    background:#0b0b0b;
+    padding:70px 10%;
+  }
+
+  .mod-section{
+    max-width:900px;
+    margin:0 auto 60px;
+  }
+
+  .mod-section h2{
+    color:#00aaff;
+    text-shadow:0 0 10px #0077ff;
+    font-size:28px;
+    margin-bottom:20px;
+    border-bottom:1px solid #003366;
+    padding-bottom:10px;
+  }
+
+  .mod-section p{
+    color:#cceeff;
+    line-height:1.8;
+    white-space:pre-line;
+  }
+
+  .golpes-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+    gap:18px;
+  }
+
+  .golpe-card{
+    background:#111;
+    border:1px solid #00aaff;
+    border-radius:8px;
+    padding:18px 20px;
+    transition:0.3s;
+  }
+
+  .golpe-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 0 15px #0088ff;
+  }
+
+  .golpe-card h3{
+    color:#00aaff;
+    font-size:17px;
+    margin-bottom:8px;
+  }
+
+  .golpe-card p{
+    color:#cceeff;
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .beneficios-lista{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .beneficios-lista li{
+    color:#cceeff;
+    line-height:1.5;
+    padding-left:28px;
+    position:relative;
+  }
+
+  .beneficios-lista li::before{
+    content:"⚡";
+    position:absolute;
+    left:0;
+    color:#00aaff;
+  }
+
+  .mod-horarios-vazio{
+    color:#88a;
+    font-style:italic;
+  }
+
+  .mod-cta{
+    max-width:900px;
+    margin:0 auto;
+    text-align:center;
+    padding-top:10px;
+  }
+
+  .mod-cta p{
+    color:#cceeff;
+    margin-bottom:18px;
+  }
+
+  .not-found{
+    padding:160px 10% 100px;
+    text-align:center;
+  }
+
+  .not-found h2{
+    color:#00aaff;
+    margin-bottom:15px;
+  }
+
+  .not-found p{
+    color:#cceeff;
+    margin-bottom:25px;
+  }
+
+  @media (max-width:768px){
+    .mod-content{ padding:50px 6%; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo-area">
+    <img src="logoasgard.png" alt="Logo CT Asgard">
+    <h1>CT ASGARD</h1>
+  </div>
+  <nav>
+    <a href="index.html#inicio">Início</a>
+    <a href="index.html#sobre">Sobre</a>
+    <a href="index.html#modalidades">Modalidades</a>
+    <a href="index.html#galeria">Galeria</a>
+    <a href="index.html#horarios">Horários</a>
+    <a href="index.html#contato">Contato</a>
+  </nav>
+</header>
+
+<div id="pagina-modalidade"></div>
+
+<footer>
+  <p>© 2026 CT Asgard</p>
+</footer>
+
+<a href="https://wa.me/5531985232297" class="whatsapp">💬</a>
+
+<script src="modalidades-data.js"></script>
+<script>
+  const horariosPadrao = [
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "18h às 19h" },
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "19h às 20h" },
+    { mod: "Muay Thai", dias: "Seg / Qua / Sex", hora: "20h às 21h" },
+    { mod: "Muay Thai Kids", dias: "Ter / Qui", hora: "18h às 19h" },
+    { mod: "Jiu-Jitsu", dias: "Seg / Qua / Sex", hora: "17h às 18h"},
+    { mod: "Jiu-Jitsu", dias: "Ter / Qui", hora: "20h às 21hh"},
+    { mod: "Boxe", dias: "Ter / Qui", hora: "19h às 20h" },
+  ];
+
+  function obterHorarios() {
+    const dados = localStorage.getItem("asgard_horarios");
+    return dados ? JSON.parse(dados) : horariosPadrao;
+  }
+
+  function renderNaoEncontrado(container) {
+    container.innerHTML = `
+      <div class="not-found">
+        <h2>Modalidade não encontrada</h2>
+        <p>Não encontramos essa modalidade. Confira as opções disponíveis na página inicial.</p>
+        <a href="index.html#modalidades" class="btn-asgard">Ver modalidades</a>
+      </div>
+    `;
+  }
+
+  function renderModalidade() {
+    const container = document.getElementById("pagina-modalidade");
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const mod = id ? MODALIDADES[id] : null;
+
+    if (!mod) {
+      renderNaoEncontrado(container);
+      return;
+    }
+
+    document.title = `${mod.nome} | CT Asgard`;
+
+    const golpesHtml = mod.golpes.map(g => `
+      <div class="golpe-card">
+        <h3>${g.nome}</h3>
+        <p>${g.desc}</p>
+      </div>
+    `).join("");
+
+    const beneficiosHtml = mod.beneficios.map(b => `<li>${b}</li>`).join("");
+
+    const extrasHtml = (mod.extras || []).map(extra => {
+      let corpo = "";
+      if (extra.tipo === "texto") {
+        corpo = `<p>${extra.texto}</p>`;
+      } else if (extra.tipo === "lista") {
+        corpo = (extra.texto ? `<p style="margin-bottom:16px;">${extra.texto}</p>` : "") +
+                `<ul class="beneficios-lista">${extra.itens.map(i => `<li>${i}</li>`).join("")}</ul>`;
+      } else if (extra.tipo === "cards") {
+        corpo = `<div class="golpes-grid">${extra.itens.map(i => `
+          <div class="golpe-card"><h3>${i.nome}</h3><p>${i.desc}</p></div>
+        `).join("")}</div>`;
+      } else if (extra.tipo === "tabela") {
+        corpo = `<div class="table-container">
+          <table>
+            <thead><tr>${extra.colunas.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+            <tbody>${extra.itens.map(linha => `<tr>${linha.map(v => `<td>${v}</td>`).join("")}</tr>`).join("")}</tbody>
+          </table>
+        </div>`;
+      }
+      return `<div class="mod-section"><h2>${extra.titulo}</h2>${corpo}</div>`;
+    }).join("");
+
+    const horariosFiltrados = obterHorarios().filter(h => h.mod === mod.horarioMod);
+    const horariosHtml = horariosFiltrados.length
+      ? `<div class="table-container">
+          <table>
+            <thead><tr><th>Dias</th><th>Horário</th></tr></thead>
+            <tbody>
+              ${horariosFiltrados.map(h => `<tr><td>${h.dias}</td><td>${h.hora}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>`
+      : `<p class="mod-horarios-vazio">Em breve novos horários para esta modalidade. Fale com a gente no WhatsApp!</p>`;
+
+    container.innerHTML = `
+      <div class="mod-hero" style="background-image:url('${mod.imagem}');">
+        <div class="mod-hero-content">
+          <a href="index.html#modalidades" class="mod-voltar">← Voltar para modalidades</a>
+          <h1>${mod.nome}</h1>
+          <p>${mod.subtitulo}</p>
+        </div>
+      </div>
+
+      <div class="mod-content">
+        <div class="mod-section">
+          <h2>História</h2>
+          <p>${mod.historia}</p>
+        </div>
+
+        <div class="mod-section">
+          <h2>Principais Golpes e Técnicas</h2>
+          <div class="golpes-grid">${golpesHtml}</div>
+        </div>
+
+        ${extrasHtml}
+
+        <div class="mod-section">
+          <h2>Benefícios</h2>
+          <ul class="beneficios-lista">${beneficiosHtml}</ul>
+        </div>
+
+        <div class="mod-section">
+          <h2>Horários desta modalidade</h2>
+          ${horariosHtml}
+        </div>
+
+        <div class="mod-cta">
+          <p>Quer experimentar uma aula de ${mod.nome}?</p>
+          <a href="https://wa.me/5531985232297" target="_blank" rel="noopener noreferrer" class="btn-asgard">Falar no WhatsApp</a>
+        </div>
+      </div>
+    `;
+  }
+
+  renderModalidade();
+</script>
+
+</body>
+</html>
